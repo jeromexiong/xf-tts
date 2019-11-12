@@ -1,0 +1,420 @@
+<!doctype html>
+<html>
+
+<head>
+  <meta name="aplus-terminal" content="1" />
+  <meta name="apple-mobile-web-app-title" content="" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="format-detection" content="telephone=no, address=no" />
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+  <title>讯飞语音测试</title>
+  <style type="text/css">
+    /*公共样式*/
+    body,
+    h1,
+    h2,
+    h3,
+    h4,
+    p,
+    ul,
+    ol,
+    li,
+    form,
+    button,
+    input,
+    textarea,
+    th,
+    td {
+      margin: 0;
+      padding: 0
+    }
+
+    h1,
+    h2,
+    h3,
+    h4 {
+      font-size: 100%
+    }
+
+    ul,
+    ol {
+      list-style: none
+    }
+
+    a {
+      text-decoration: none
+    }
+
+    a:hover {
+      text-decoration: underline
+    }
+
+    img {
+      border: 0
+    }
+
+    button,
+    input,
+    select,
+    textarea {
+      font-size: 100%
+    }
+
+    html {
+      font-size: 16px;
+    }
+
+    body {
+      background-color: #EDE7EB;
+    }
+
+    #app {
+      display: flex;
+      flex-direction: column;
+      width: 100vw;
+      height: 100vh;
+      position: relative;
+    }
+
+    .msg_content {
+      flex: 1;
+      overflow-y: auto;
+      overflow-x: hidden;
+    }
+
+    /* chat box */
+    .left_group,
+    .right_group {
+      padding: 6px;
+      display: flex;
+    }
+
+    .left_group {
+      justify-content: flex-start;
+    }
+
+    .right_group {
+      justify-content: flex-end;
+    }
+
+    .group_avatar {
+      width: 45px;
+      height: 45px;
+    }
+
+    .group_content {
+      max-width: calc(100% - 90px);
+      position: relative;
+    }
+
+    .left_msg,
+    .right_msg {
+      display: inline-block;
+      padding: 8px;
+      border-radius: 4px;
+      background-color: #fff;
+      margin: 0 15px 12px;
+    }
+
+    .left_msg {
+      box-shadow: 0px 0px 2px #ddd;
+    }
+
+    .right_msg {
+      text-align: left;
+      background-color: #9EEA6A;
+      box-shadow: 0px 0px 2px #bbb;
+    }
+
+    .left_triangle,
+    .right_triangle {
+      width: 0;
+      height: 0;
+      position: absolute;
+      top: 10px;
+      display: inline-block;
+      border-top: 10px solid transparent;
+      border-bottom: 10px solid transparent;
+    }
+
+    .left_triangle {
+      left: 4px;
+      border-right: 12px solid #fff;
+    }
+
+    .right_triangle {
+      right: 4px;
+      border-left: 12px solid #9EEA6A;
+    }
+
+    .bottom_control {
+      background: #F9EFED;
+      /* position: fixed;
+            bottom: 0; */
+      /* height: 44px; */
+      max-height: 7rem;
+      width: 100vw;
+      box-sizing: border-box;
+      display: flex;
+      align-items: flex-end;
+      padding: 5px 10px;
+    }
+
+    .control_input {
+      flex: 1;
+      user-select: text;
+      border-radius: 5px;
+      background: white;
+      color: black;
+      /* 9*2 + 16 = 34 + 5*2 = 44*/
+      padding: 9px 10px;
+      outline: none;
+      line-height: 1rem;
+      max-height: 5rem;
+      overflow: hidden;
+      white-space: pre-wrap;
+    }
+
+    .control_send {
+      background: #227CFA;
+      color: #fff;
+      border-radius: 5px;
+      border: none;
+      outline: none;
+      font-size: 12px;
+      padding: 5px 10px;
+      margin-left: 10px;
+      height: 34px;
+      width: 44px;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="app">
+    <div class="msg_content">
+      <div class="right_group">
+        <div class="group_content">
+          <audio class="right_msg" id="audio" :src="audioSrc" controls type="audio/wav" autoPlay
+            v-if="audioSrc"></audio>
+          <span class="right_msg" v-else>语音测试</span>
+          <i class="right_triangle"></i>
+        </div>
+        <img class="group_avatar"
+          src="https://ss1.bdstatic.com/70cFvXSh_Q1YnxGkpoWK1HF6hhy/it/u=2018939532,1617516463&fm=26&gp=0.jpg" />
+      </div>
+      <!-- <div class="left_group">
+        <img class="group_avatar" src="https://ss2.bdstatic.com/70cFvnSh_Q1YnxGkpoWK1HF6hhy/it/u=3750211471,3151515749&fm=26&gp=0.jpg" />
+        <div class="group_content">
+          <i class="left_triangle"></i>
+          <span class="left_msg">欢迎来抢楼！欢迎来抢楼！欢迎来抢楼！欢迎来抢楼！欢迎来抢楼！欢迎来抢楼！欢迎来抢楼！</span>
+        </div>
+      </div> -->
+      <div v-for="(item, index) in items" :key="index">
+        <div class="right_group" v-if="item.isRight">
+          <div class="group_content">
+            <span class="right_msg">{{item.msg}}</span>
+            <i class="right_triangle"></i>
+          </div>
+          <img class="group_avatar"
+            src="https://ss1.bdstatic.com/70cFvXSh_Q1YnxGkpoWK1HF6hhy/it/u=2973069531,657782944&fm=26&gp=0.jpg" />
+        </div>
+        <div class="left_group" v-else>
+          <img class="group_avatar"
+            src="https://ss2.bdstatic.com/70cFvnSh_Q1YnxGkpoWK1HF6hhy/it/u=3750211471,3151515749&fm=26&gp=0.jpg" />
+          <div class="group_content">
+            <i class="left_triangle"></i>
+            <span class="left_msg">{{item.msg}}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- 输入框模块 -->
+    <div class="bottom_control">
+      <div class="control_input" contenteditable="true" @blur="blurAdjust" @keyup.enter="sendMsg"
+        @input="inputMsg = $event.target.innerText" ref="control_input"></div>
+      <button class="control_send" @click="sendMsg">发送</button>
+    </div>
+  </div>
+</body>
+
+<script>
+  // 计算缩放比例
+  (function () {
+    var phoneScale = parseInt(window.screen.width) / 375;
+    document.write('<meta name="viewport" content="width=375, minimum-scale=' + phoneScale + ', maximum-scale=' + phoneScale + ', user-scalable=no">');
+  })();
+</script>
+<script src="https://cdn.jsdelivr.net/npm/vue"></script>
+<script>
+  new Vue({
+    el: "#app",
+    data: {
+      items: [],
+      inputMsg: "",
+      audioSrc: "",
+      host: "http://192.168.1.192:3000"
+    },
+    created() {
+      var box = document.getElementsByClassName("msg_content")[0]
+      box.scrollTop = box.scrollHeight
+      // setInterval(() => {
+      //     this.items.push({ isLeft: true, msg: "left msg" + new Date().toLocaleString() })
+      //     this.items.push({ isLeft: false, msg: "right msg" + new Date().toLocaleString() })
+      //     this.$nextTick(() => {
+      //         var last = document.getElementsByClassName("group_content")
+      //         last[last.length - 1].scrollIntoView({ block: "start", behavior: "smooth" })
+      //     })
+      // }, 3000);
+
+      this.getWebPcm2WavBase64(`${this.host}/audio/demo.pcm`).then(res => {
+        this.audioSrc = res
+        console.log("加载成功")
+      }).catch(err => {
+        console.log("加载失败", err)
+      })
+    },
+    methods: {
+      // 解决苹果不回弹页面
+      blurAdjust() {
+        var u = navigator.userAgent, app = navigator.appVersion
+        var isIOS = !!u.match(/\(i[^;]+;( U;)? CPU.+Mac OS X/); //ios终端
+        if (!isIOS) {
+          return
+        }
+        setTimeout(() => {
+          let result = 'pc';
+          if (/(iPhone|iPad|iPod|iOS)/i.test(navigator.userAgent)) { //判断iPhone|iPad|iPod|iOS
+            result = 'ios'
+          } else if (/(Android)/i.test(navigator.userAgent)) {  //判断Android
+            result = 'android'
+          }
+
+          if (result = 'ios') {
+            document.activeElement.scrollIntoView();
+          }
+        }, 300)
+      },
+      sendMsg() {
+        console.log(this.inputMsg)
+        fetch(`${this.host}/demo?text=${this.inputMsg}`).then(resp => {
+          resp.json().then(res => {
+            console.log(res)
+            if (res.code != 0) return;
+            this.getWebPcm2WavBase64(`${this.host}/audio/${res.data.fileName}.pcm`).then(res => {
+              this.audioSrc = res
+              console.log("加载成功")
+              this.items.push({ isRight: true, msg: "加载成功" });
+            }).catch(err => {
+              console.log("加载失败", err)
+              this.items.push({ isRight: true, msg: "加载失败" });
+            })
+          })
+        })
+        this.items.push({ isRight: false, msg: this.inputMsg });
+        this.items.push({ isRight: true, msg: "开始转换" });
+        this.inputMsg = ""
+        this.$refs.control_input.innerText = "";
+      },
+      async getWebFileArrayBuffer(url) {
+        return await fetch(url).then(response => {
+          if (response.status != 200) return Promise.reject(response.statusText)
+          return response.arrayBuffer()
+        })
+      },
+      async getWebPcm2WavArrayBuffer(url) {
+        try {
+          const bytes = await this.getWebFileArrayBuffer(url)
+          // 这里是当前业务需求，特定的参数，采样率16000，采样位数16，声道数1
+          return this.addWavHeader(bytes, 16000, 16, 1)
+        } catch (error) {
+          return Promise.reject(error)
+        }
+      },
+      async getWebPcm2WavBase64(url) {
+        try {
+          let bytes = await this.getWebPcm2WavArrayBuffer(url)
+          return `data:audio/wav;base64,${btoa(new Uint8Array(bytes).reduce((data, byte) => {
+            return data + String.fromCharCode(byte)
+          }, ''))}`
+        } catch (error) {
+          return Promise.reject(error)
+        }
+      },
+      addWavHeader(samples, sampleRateTmp, sampleBits, channelCount) {
+        let dataLength = samples.byteLength
+        /* 新的buffer类，预留 44 bytes 的　heaer 空间 */
+        let buffer = new ArrayBuffer(44 + dataLength)
+        /* 转为 Dataview, 利用 API 来填充字节 */
+        let view = new DataView(buffer)
+        /* 定义一个内部函数，以 big end 数据格式填充字符串至 DataView */
+        function writeString(view, offset, string) {
+          for (let i = 0; i < string.length; i++) {
+            view.setUint8(offset + i, string.charCodeAt(i))
+          }
+        }
+
+        let offset = 0
+        /* ChunkID, 4 bytes,  资源交换文件标识符 */
+        writeString(view, offset, 'RIFF'); offset += 4
+        /* ChunkSize, 4 bytes, 下个地址开始到文件尾总字节数,即文件大小-8 */
+        view.setUint32(offset, /* 32 */ 36 + dataLength, true); offset += 4
+        /* Format, 4 bytes, WAV文件标志 */
+        writeString(view, offset, 'WAVE'); offset += 4
+        /* Subchunk1 ID, 4 bytes, 波形格式标志 */
+        writeString(view, offset, 'fmt '); offset += 4
+        /* Subchunk1 Size, 4 bytes, 过滤字节,一般为 0x10 = 16 */
+        view.setUint32(offset, 16, true); offset += 4
+        /* Audio Format, 2 bytes, 格式类别 (PCM形式采样数据) */
+        view.setUint16(offset, 1, true); offset += 2
+        /* Num Channels, 2 bytes,  通道数 */
+        view.setUint16(offset, channelCount, true); offset += 2
+        /* SampleRate, 4 bytes, 采样率,每秒样本数,表示每个通道的播放速度 */
+        view.setUint32(offset, sampleRateTmp, true); offset += 4
+        /* ByteRate, 4 bytes, 波形数据传输率 (每秒平均字节数) 通道数×每秒数据位数×每样本数据位/8 */
+        view.setUint32(offset, sampleRateTmp * channelCount * (sampleBits / 8), true); offset += 4
+        /* BlockAlign, 2 bytes, 快数据调整数 采样一次占用字节数 通道数×每样本的数据位数/8 */
+        view.setUint16(offset, channelCount * (sampleBits / 8), true); offset += 2
+        /* BitsPerSample, 2 bytes, 每样本数据位数 */
+        view.setUint16(offset, sampleBits, true); offset += 2
+        /* Subchunk2 ID, 4 bytes, 数据标识符 */
+        writeString(view, offset, 'data'); offset += 4
+        /* Subchunk2 Size, 4 bytes, 采样数据总数,即数据总大小-44 */
+        view.setUint32(offset, dataLength, true); offset += 4
+
+        /* 数据流需要以大端的方式存储，定义不同采样比特的 API */
+        function floatTo32BitPCM(output, offset, input) {
+          input = new Int32Array(input)
+          for (let i = 0; i < input.length; i++ , offset += 4) {
+            output.setInt32(offset, input[i], true)
+          }
+        }
+        function floatTo16BitPCM(output, offset, input) {
+          input = new Int16Array(input)
+          for (let i = 0; i < input.length; i++ , offset += 2) {
+            output.setInt16(offset, input[i], true)
+          }
+        }
+        function floatTo8BitPCM(output, offset, input) {
+          input = new Int8Array(input)
+          for (let i = 0; i < input.length; i++ , offset++) {
+            output.setInt8(offset, input[i], true)
+          }
+        }
+        if (sampleBits == 16) {
+          floatTo16BitPCM(view, 44, samples)
+        } else if (sampleBits == 8) {
+          floatTo8BitPCM(view, 44, samples)
+        } else {
+          floatTo32BitPCM(view, 44, samples)
+        }
+        return view.buffer
+      }
+    }
+  })
+</script>
+
+</html>
