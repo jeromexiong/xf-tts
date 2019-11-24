@@ -18,7 +18,7 @@ const authorization = CryptoJS.enc.Base64.stringify(
 const wss = `wss://${requestHost}${url}?authorization=${authorization}&date=${encodeURI(
   date
 )}&host=${host}`;
-// console.log(wss)
+// 注意⚠️ 需要设置公网IP白名单
 
 const fs = require("fs");
 const WebSocketClient = require("websocket").client;
@@ -31,6 +31,9 @@ const socketConnect = (text, vcn = "xiaoyan") => {
     aue: "raw",
     auf: "audio/L16;rate=16000",
     vcn,
+    speed: 75,
+    volume: 50,
+    // bgs: 1,//合成音频的背景音 0/1
     tte: "utf8"
   };
   const data = {
@@ -73,11 +76,44 @@ const socketConnect = (text, vcn = "xiaoyan") => {
             throw err;
           }
           console.log(status, ced, fileInit);
-          if (fileInit) resolve({ code: 0, data: { status, savePath, fileName } });
+          if (fileInit) {
+            resolve({ code: 0, data: { status, savePath, fileName } });
+            pcm2mp3(fileName);
+          }
         });
       });
     });
     client.connect(wss);
   });
+};
+var lame = require("lame");
+
+const pcm2mp3 = fileName => {
+  // create the Encoder instance
+  var encoder = new lame.Encoder({
+    // input
+    channels: 1, // 2 channels (left and right)
+    bitDepth: 16, // 16-bit samples
+    sampleRate: 16000, // 44,100 Hz sample rate
+
+    // output
+    bitRate: 128,
+    outSampleRate: 16000,
+    mode: lame.STEREO // STEREO (default), JOINTSTEREO, DUALCHANNEL or MONO
+  });
+
+  fs.createReadStream(`./public/audio/${fileName}.pcm`)
+    .pipe(encoder)
+    .pipe(fs.createWriteStream(`./public/audio/${fileName}.mp3`))
+    .on("close", function() {
+      console.error("done!");
+      fs.unlink(`./public/audio/${fileName}.pcm`, function(error) {
+        if (error) {
+          console.log(error);
+          return false;
+        }
+        console.log("删除文件成功");
+      });
+    });
 };
 module.exports = { socketConnect };
