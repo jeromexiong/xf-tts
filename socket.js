@@ -107,6 +107,7 @@ const pcm2mp3 = fileName => {
     .pipe(fs.createWriteStream(`./public/audio/${fileName}.mp3`))
     .on("close", function() {
       console.error("done!");
+      putFile(`${fileName}.mp3`, `./public/audio/${fileName}.mp3`)
       fs.unlink(`./public/audio/${fileName}.pcm`, function(error) {
         if (error) {
           console.log(error);
@@ -116,4 +117,25 @@ const pcm2mp3 = fileName => {
       });
     });
 };
+
+var OSS = require("ali-oss");
+const client = new OSS({
+  region: "oss-cn-shanghai",
+  accessKeyId: "accessKeyId",
+  accessKeySecret: "accessKeySecret",
+  bucket: "bucket"
+});
+/**
+ * 上传本地文件
+ * @param {string} object_name 可以自定义为文件名（例如file.txt）或目录（例如abc/test/file.txt）的形式，实现将文件上传至当前Bucket或Bucket下的指定目录。
+ * @param {*} local_file 本地文件地址
+ */
+async function putFile(object_name, local_file) {
+  try {
+    let result = await client.put(object_name, local_file);
+    console.log(result);
+  } catch (e) {
+    console.log(e);
+  }
+}
 module.exports = { socketConnect };

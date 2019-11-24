@@ -11,6 +11,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "ali-oss": "^6.2.1",
     "crypto-js": "^3.1.9-1",
     "express": "^4.17.1",
     "lame": "^1.2.4",
